@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}-575流转</title>
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mdui/0.4.2/css/mdui.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>-->
+    {% block head %}{% endblock %}
+</head>
+
+
+<body class="mdui-drawer-body-left mdui-appbar-with-toolbar  mdui-theme-primary-indigo mdui-theme-accent-pink">
+<header class="mdui-appbar mdui-appbar-fixed">
+    <div class="mdui-toolbar mdui-color-theme">
+        <span class="mdui-btn mdui-btn-icon mdui-ripple mdui-ripple-white"
+              mdui-drawer="{target: '#main-drawer', swipe: true}"><i class="mdui-icon material-icons">menu</i></span>
+        <a href="{{ url_for('flow_bp.index') }}" class="mdui-typo-headline mdui-hidden-xs">MyGene</a>
+
+        <div class="mdui-toolbar-spacer"></div>
+        {% if current_user.is_authenticated %}
+        <a href="#">{{ current_user.username }}</a>
+        <a href="{{ url_for('user_bp.logout') }}">注销</a>
+        {% else %}
+        <a href="{{ url_for('user_bp.login') }}">登录</a>
+        <a href="{{ url_for('user_bp.register') }}">注册</a>
+        {% endif %}
+    </div>
+</header>
+
+<div class="mdui-drawer" id="main-drawer">
+    <div class="mdui-list" mdui-collapse="{accordion: true}" style="margin-bottom: 76px;">
+
+    </div>
+</div>
+
+<div class="mdui-toolbar">
+    <span class="mdui-typo-title">{% block page %}{% endblock %}</span>
+    {% block button %}{% endblock %}
+    <div class="mdui-toolbar-spacer"></div>
+</div>
+{% block content %}{% endblock %}
+
+
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mdui/0.4.2/js/mdui.min.js"></script>
+<script>
+    mdui.mutation();
+</script>
+{% block js %}
+{% endblock %}
+</body>
+</html>
