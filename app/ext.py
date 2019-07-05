@@ -100,8 +100,8 @@ def creat_flow(res, dict_v):
     res.实际报告完成时间 = str(dict_v['实际报告完成时间'])
     res.预计报告完成时间 = str(dict_v['预计报告完成时间'])
     res.最终优先度 = str(dict_v['最终优先度'])
-    res.实际医学部审核时间 = str(dict_v['实际医学部审核时间'])
-    res.预计医学部审核时间 = str(dict_v['预计医学部审核时间'])
+    res.实际审核完成时间 = str(dict_v['实际审核完成时间'])
+    res.预计审核完成时间 = str(dict_v['预计审核完成时间'])
     res.备注 = str(dict_v['备注'])
     res.状态 = '等待流转'
 
@@ -203,8 +203,7 @@ def out_file_575(infile):
                       df[['预计测序完成时间', '类型', '是否时间点前']].values]
     df['预计报告完成时间'] = [cal_time_f(r_time, type, tim, '报告') for r_time, type, tim in
                       df[['预计生信完成时间', '类型', '是否时间点前']].values]
-    df['预计审核完成时间'] = [cal_time_f(r_time, type, tim, '报告') for r_time, type, tim in
-                      df[['预计生信完成时间', '类型', '是否时间点前']].values]
+    df['预计审核完成时间'] = [r_time for r_time in df['预计报告完成时间'].values]
     # df.to_excel(os.path.join(file_path, outfile), index=False)
     return df
 
