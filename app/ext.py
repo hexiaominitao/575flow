@@ -103,6 +103,7 @@ def creat_flow(res, dict_v):
     res.实际医学部审核时间 = str(dict_v['实际医学部审核时间'])
     res.预计医学部审核时间 = str(dict_v['预计医学部审核时间'])
     res.备注 = str(dict_v['备注'])
+    res.状态 = '等待流转'
 
 
 def dict_to_sql(file, classname, session):

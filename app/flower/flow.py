@@ -60,11 +60,10 @@ def view():
 # 文件上传
 @flow_bp.route('/api/updata/', methods=['GET', 'POST'])
 def updata():
-
     file_dir = current_app.config['COUNT_DEST']
     if request.method == 'GET':
         for file in os.listdir(os.path.join(os.getcwd(), file_dir)):
-            os.remove(os.path.join(os.getcwd(), file_dir,file))
+            os.remove(os.path.join(os.getcwd(), file_dir, file))
     if not os.path.exists(os.path.join(os.getcwd(), file_dir)):
         os.mkdir(os.path.join(os.getcwd(), file_dir))
     file = request.files['file']
@@ -99,5 +98,41 @@ def review_rp():
             #     '最终优先度': sel['最终优先度'],
             # })
             sample.update(sel)
+            sample.update({
+                '状态': '完成',
+            })
             db.session.commit()
     return 'hello'
+
+
+@flow_bp.route('/api/list/flow/', methods=['GET', 'POST'])
+def add_flow():
+    data = request.get_data()
+    selection = ((json.loads(data)['selection']))
+    for sel in selection:
+        # print((sel))
+        mg_name = (sel['迈景编号'])
+        sam_name = sel['申请单号']
+        # print(sam_name)
+        sample = Flow.query.filter(and_(Flow.迈景编号 == mg_name, Flow.申请单号 == sam_name))
+        print(sample.first().最终优先度)
+        if sample.first():
+            sample.update({
+                    '状态': '流转中',
+                })
+            db.session.commit()
+    return 'hello'
+
+
+@flow_bp.route('/api/flowing/', methods=['GET', 'POST'])
+def flowing():
+    status = Flow.query.filter(Flow.状态 == '流转中').order_by(Flow.id.desc()).all()
+    sample = {}
+    data = []
+    filter_mg = []
+    for row in status:
+        data.append(row.to_dict())
+        filter_mg.append({'label': row.迈景编号, 'value': row.迈景编号})
+    sample['data'] = data
+    sample['filter_mg'] = filter_mg
+    return jsonify(sample)

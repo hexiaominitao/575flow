@@ -95,6 +95,7 @@ class Flow(db.Model):
     实际审核完成时间 = db.Column(db.String(100))
     预计审核完成时间 = db.Column(db.String(100))
     最终优先度 = db.Column(db.String(100))
+    状态 = db.Column(db.String(100))
     备注 = db.Column(db.String(100))
 
     def to_dict(self):
@@ -124,6 +125,7 @@ class Flow(db.Model):
                      '实际审核完成时间': self.实际审核完成时间,
                      '预计审核完成时间': self.预计审核完成时间,
                      '最终优先度': self.最终优先度,
+                     '状态': self.状态,
                      '备注': self.备注}
         return flow_dict
 
