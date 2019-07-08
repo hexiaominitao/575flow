@@ -22,6 +22,7 @@ admin_permission = Permission(RoleNeed('admin'))  # 添加权限 与manage 对�
 default_permission = Permission(RoleNeed('default'))
 
 
+
 @login_manager.user_loader
 def load_user(user_id):
     from .models import User
