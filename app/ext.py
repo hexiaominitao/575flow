@@ -122,11 +122,11 @@ def dict_to_sql(file, classname, session):
 
 def cal_difftime(time1, time2):
     # 字符串转换为datetime类型
-    times1 = datetime.datetime.strptime(time1, '%Y.%m.%d %H:%M')
-    times2 = datetime.datetime.strptime(time2, '%Y.%m.%d %H:%M')
+    times1 = datetime.datetime.strptime(time1, '%Y.%m.%d')
+    times2 = datetime.datetime.strptime(time2, '%Y.%m.%d')
     # 利用datetime计算时间差并格式化输出
     times = str(times2 - times1).split(':')
-    difftime = times[0] + '小时' + times[1] + '分' + times[2] + '秒'
+    difftime = times[0] + '小时' + times[1] + '分'
     difftime = difftime.replace('days', '天')
     difftime = difftime.replace('day', '天')
     return difftime
@@ -134,8 +134,8 @@ def cal_difftime(time1, time2):
 
 def cal_time(time1, time2):
     # 字符串转换为datetime类型
-    times1 = datetime.datetime.strptime(time1, '%Y.%m.%d %H:%M')
-    times2 = datetime.datetime.strptime(time2, '%Y.%m.%d %H:%M')
+    times1 = datetime.datetime.strptime(time1, '%Y.%m.%d')
+    times2 = datetime.datetime.strptime(time2, '%Y.%m.%d')
     # 利用datetime计算时间差并格式化输出
     times = (times2 - times1).days
     return times
@@ -143,14 +143,14 @@ def cal_time(time1, time2):
 
 def get_weekday(r_time, dw_dict=None):
     if dw_dict:
-        return dw_dict[str(datetime.datetime.strptime(r_time, '%Y.%m.%d %H:%M').weekday())]
+        return dw_dict[str(datetime.datetime.strptime(r_time, '%Y.%m.%d').weekday())]
     else:
-        return datetime.datetime.strptime(r_time, '%Y.%m.%d %H:%M').weekday()
+        return datetime.datetime.strptime(r_time, '%Y.%m.%d').weekday()
 
 
 def get_day(r_time, days):
-    return (datetime.datetime.strptime(r_time, '%Y.%m.%d %H:%M') + datetime.timedelta(days=days)).strftime(
-        "%Y.%m.%d %H:%M")
+    return (datetime.datetime.strptime(r_time, '%Y.%m.%d') + datetime.timedelta(days=days)).strftime(
+        "%Y.%m.%d")
 
 
 def ad_week(day):
@@ -188,8 +188,7 @@ def out_file_575(infile):
     file = os.path.join(file_path, infile)
     df = pd.read_excel(file,keep_default_na=False)
     df['周几'] = [get_weekday(r_time, dw_dict) for r_time in df['收样时间'].values]
-    df['是否时间点前'] = ['否' if cal_time(str(r_time), str(r_time).split(' ')[0] + time_d[type])
-                    else '是' for r_time, type in df[['收样时间', '类型']].values]
+    df['是否时间点前'] = ['是' for _ in df['收样时间'].values]
     df['预计优先度'] = [priority_d[types][get_weekday(r_time)] for r_time, types in df[['收样时间', '类型']].values]
     df['预计完成时间'] = [cycle_d[type][get_weekday(r_time)] if timm == '是'
                     else cycle_d[type][get_weekday(r_time)] + 1
