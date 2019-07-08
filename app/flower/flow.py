@@ -105,6 +105,20 @@ def review_rp():
     return 'hello'
 
 
+@flow_bp.route('/api/submit1/', methods=['GET', 'POST'])
+def submit_step():
+    data = request.get_data()
+    selection = ((json.loads(data)['data']))
+    for sel in selection:
+        mg_name = (sel['迈景编号'])
+        sam_name = sel['申请单号']
+        sample = Flow.query.filter(and_(Flow.迈景编号 == mg_name, Flow.申请单号 == sam_name))
+        if sample.first():
+            sample.update(sel)
+            db.session.commit()
+    return 'hello'
+
+
 @flow_bp.route('/api/list/flow/', methods=['GET', 'POST'])
 def add_flow():
     data = request.get_data()
