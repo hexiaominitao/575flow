@@ -22,7 +22,6 @@ admin_permission = Permission(RoleNeed('admin'))  # 添加权限 与manage 对�
 default_permission = Permission(RoleNeed('default'))
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     from .models import User
@@ -80,30 +79,23 @@ def excel_to_dict(file):
 def creat_flow(res, dict_v):
     res.患者姓名 = str(dict_v['患者姓名'])
     res.检测项目 = str(dict_v['检测项目'])
-    res.肿瘤 = str(dict_v['肿瘤'])
+    res.病理诊断 = str(dict_v['病理诊断'])
     res.申请单号 = str(dict_v['申请单号'])
     res.迈景编号 = str(dict_v['迈景编号'])
-    res.类型 = str(dict_v['类型'])
-    res.收样时间 = str(dict_v['收样时间'])
-    res.是否时间点前 = str(dict_v['是否时间点前'])
-    res.周几 = str(dict_v['周几'])
-    res.预计优先度 = str(dict_v['预计优先度'])
+    res.样本类型 = str(dict_v['样本类型'])
+    res.收样日期 = str(dict_v['收样日期'])
+    res.流转开始日期 = str(dict_v['流转开始日期'])
+    res.提取完成日期 = str(dict_v['提取完成日期'])
+    res.建库完成日期 = str(dict_v['建库完成日期'])
+    res.实际上机日期 = str(dict_v['实际上机日期'])
+    res.测序完成日期 = str(dict_v['测序完成日期'])
+    res.生信完成日期 = str(dict_v['生信完成日期'])
+    res.报告完成时间 = str(dict_v['报告完成时间'])
+    res.审核完成时间 = str(dict_v['审核完成时间'])
     res.预计完成时间 = str(dict_v['预计完成时间'])
-    res.实际提取完成时间 = str(dict_v['实际提取完成时间'])
-    res.预计提取完成时间 = str(dict_v['预计提取完成时间'])
-    res.实际建库开始时间 = str(dict_v['实际建库开始时间'])
-    res.实际建库完成时间 = str(dict_v['实际建库完成时间'])
-    res.预计建库完成时间 = str(dict_v['预计建库完成时间'])
-    res.实际测序完成时间 = str(dict_v['实际测序完成时间'])
-    res.预计测序完成时间 = str(dict_v['预计测序完成时间'])
-    res.实际生信完成时间 = str(dict_v['实际生信完成时间'])
-    res.预计生信完成时间 = str(dict_v['预计生信完成时间'])
-    res.实际报告完成时间 = str(dict_v['实际报告完成时间'])
-    res.预计报告完成时间 = str(dict_v['预计报告完成时间'])
-    res.最终优先度 = str(dict_v['最终优先度'])
-    res.实际审核完成时间 = str(dict_v['实际审核完成时间'])
-    res.预计审核完成时间 = str(dict_v['预计审核完成时间'])
     res.备注 = str(dict_v['备注'])
+    res.type = str(dict_v['type'])
+    res.终止备注 = ''
     res.状态 = '等待流转'
 
 
@@ -159,52 +151,13 @@ def ad_week(day):
     return day + 1
 
 
-def cal_time_f(r_time, types, tim, item):
-    return get_day(r_time,
-                   days=time_c[types][item][get_weekday(r_time) if tim == '是' else ad_week(get_weekday(r_time))])
-
-
-dw_dict = {'0': '周一', '1': '周二', '2': '周三', '3': '周四', '4': '周五', '5': '周六', '6': '周日'}
-priority_d = {'血液': {6: 'S', 0: 'A', 1: 'A', 2: 'B', 3: 'B', 4: 'C', 5: 'C'},
-              '组织': {6: 'A', 0: 'B', 1: 'B', 2: 'B', 3: 'C', 4: 'D', 5: 'B'}}
-
-cycle_d = {'组织': {6: 12, 0: 11, 1: 11, 2: 10, 3: 8, 4: 8, 5: 7},
-           '血液': {6: 14, 0: 13, 1: 13, 2: 12, 3: 11, 4: 10, 5: 9}}
-
-time_d = {'血液': ' 14:00', '组织': ' 11:00'}
-
-time_c = {
-    '组织': {'提取': {6: 1, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}, '建库': {6: 2, 0: 2, 1: 2, 2: 2, 3: 3, 4: 3, 5: 2},
-           '测序': {6: 6, 0: 6, 1: 6, 2: 5, 3: 3, 4: 2, 5: 2}, '生信': {6: 1, 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
-           '报告': {6: 1, 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1}},
-    '血液': {'提取': {6: 1, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}, '建库': {6: 2, 0: 2, 1: 2, 2: 2, 3: 3, 4: 3, 5: 2},
-           '测序': {6: 6, 0: 6, 1: 6, 2: 5, 3: 3, 4: 2, 5: 2}, '生信': {6: 2, 0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2},
-           '报告': {6: 2, 0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2}}
-}
-
-
 def out_file_575(infile):
     file_path = '/home/hemin/Desktop/575流转'
     file = os.path.join(file_path, infile)
-    df = pd.read_excel(file,keep_default_na=False)
-    df['周几'] = [get_weekday(r_time, dw_dict) for r_time in df['收样时间'].values]
-    df['是否时间点前'] = ['是' for _ in df['收样时间'].values]
-    df['预计优先度'] = [priority_d[types][get_weekday(r_time)] for r_time, types in df[['收样时间', '类型']].values]
-    df['预计完成时间'] = [cycle_d[type][get_weekday(r_time)] if timm == '是'
-                    else cycle_d[type][get_weekday(r_time)] + 1
-                    for r_time, type, timm in df[['收样时间', '类型', '是否时间点前']].values]
-
-    df['预计提取完成时间'] = [cal_time_f(r_time, type, tim, '提取') for r_time, type, tim in df[['收样时间', '类型', '是否时间点前']].values]
-    df['预计建库完成时间'] = [cal_time_f(r_time, type, tim, '建库') for r_time, type, tim in
-                      df[['预计提取完成时间', '类型', '是否时间点前']].values]
-    df['预计测序完成时间'] = [cal_time_f(r_time, type, tim, '测序') for r_time, type, tim in
-                      df[['预计建库完成时间', '类型', '是否时间点前']].values]
-    df['预计生信完成时间'] = [cal_time_f(r_time, type, tim, '生信') for r_time, type, tim in
-                      df[['预计测序完成时间', '类型', '是否时间点前']].values]
-    df['预计报告完成时间'] = [cal_time_f(r_time, type, tim, '报告') for r_time, type, tim in
-                      df[['预计生信完成时间', '类型', '是否时间点前']].values]
-    df['预计审核完成时间'] = [r_time for r_time in df['预计报告完成时间'].values]
-    # df.to_excel(os.path.join(file_path, outfile), index=False)
+    df = pd.read_excel(file, keep_default_na=False)
+    df['预计完成时间'] = [get_day(day, 14) if '血' in type else get_day(day, 11) for day, type in df[['收样日期', '样本类型']].values]
+    df['type'] = ['b' if '血' in type else 't' for type in df['样本类型'].values]
+    print(df['预计完成时间'] )
     return df
 
 
@@ -230,3 +183,7 @@ def dict_df_to_sql(df, classname, session):
                 creat_flow(res, dict_v[key])
                 session.add(res)
                 session.commit()
+
+
+def progress():
+    pass

@@ -72,66 +72,51 @@ class Flow(db.Model):
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     患者姓名 = db.Column(db.String(100))
     检测项目 = db.Column(db.String(100))
-    肿瘤 = db.Column(db.String(100))
+    病理诊断 = db.Column(db.String(100))
     申请单号 = db.Column(db.String(100))
     迈景编号 = db.Column(db.String(100))
-    类型 = db.Column(db.String(100))
-    收样时间 = db.Column(db.String(100))
-    是否时间点前 = db.Column(db.String(100))
-    周几 = db.Column(db.String(100))
-    预计优先度 = db.Column(db.String(100))
+    样本类型 = db.Column(db.String(100))
+    type = db.Column(db.String(10))
+    收样日期 = db.Column(db.String(100))
+    流转开始日期 = db.Column(db.String(100))
+    提取完成日期 = db.Column(db.String(100))
+    建库完成日期 = db.Column(db.String(100))
+    实际上机日期 = db.Column(db.String(100))
+    测序完成日期 = db.Column(db.String(100))
+    生信完成日期 = db.Column(db.String(100))
+    报告完成时间 = db.Column(db.String(100))
+    审核完成时间 = db.Column(db.String(100))
     预计完成时间 = db.Column(db.String(100))
-    实际提取完成时间 = db.Column(db.String(100))
-    预计提取完成时间 = db.Column(db.String(100))
-    实际建库开始时间 = db.Column(db.String(100))
-    实际建库完成时间 = db.Column(db.String(100))
-    预计建库完成时间 = db.Column(db.String(100))
-    实际测序完成时间 = db.Column(db.String(100))
-    预计测序完成时间 = db.Column(db.String(100))
-    实际生信完成时间 = db.Column(db.String(100))
-    预计生信完成时间 = db.Column(db.String(100))
-    实际报告完成时间 = db.Column(db.String(100))
-    预计报告完成时间 = db.Column(db.String(100))
-    实际审核完成时间 = db.Column(db.String(100))
-    预计审核完成时间 = db.Column(db.String(100))
-    最终优先度 = db.Column(db.String(100))
     状态 = db.Column(db.String(100))
-    备注 = db.Column(db.String(100))
+    备注 = db.Column(db.String(500))
+    终止备注 = db.Column(db.String(500))
 
     def to_dict(self):
         flow_dict = {'id': self.id,
                      '患者姓名': self.患者姓名,
                      '检测项目': self.检测项目,
-                     '肿瘤': self.肿瘤,
+                     '病理诊断': self.病理诊断,
                      '申请单号': self.申请单号,
                      '迈景编号': self.迈景编号,
-                     '类型': self.类型,
-                     '收样时间': self.收样时间,
-                     '是否时间点前': self.是否时间点前,
-                     '周几': self.周几,
-                     '预计优先度': self.预计优先度,
+                     '样本类型': self.样本类型,
+                     'type': self.type,
+                     '收样日期': self.收样日期,
+                     '流转开始日期': self.流转开始日期,
+                     '提取完成日期': self.提取完成日期,
+                     '建库完成日期': self.建库完成日期,
+                     '实际上机日期': self.实际上机日期,
+                     '测序完成日期': self.测序完成日期,
+                     '生信完成日期': self.生信完成日期,
+                     '报告完成时间': self.报告完成时间,
+                     '审核完成时间': self.审核完成时间,
                      '预计完成时间': self.预计完成时间,
-                     '实际提取完成时间': self.实际提取完成时间,
-                     '预计提取完成时间': self.预计提取完成时间,
-                     '实际建库开始时间': self.实际建库开始时间,
-                     '实际建库完成时间': self.实际建库完成时间,
-                     '预计建库完成时间': self.预计建库完成时间,
-                     '实际测序完成时间': self.实际测序完成时间,
-                     '预计测序完成时间': self.预计测序完成时间,
-                     '实际生信完成时间': self.实际生信完成时间,
-                     '预计生信完成时间': self.预计生信完成时间,
-                     '实际报告完成时间': self.实际报告完成时间,
-                     '预计报告完成时间': self.预计报告完成时间,
-                     '实际审核完成时间': self.实际审核完成时间,
-                     '预计审核完成时间': self.预计审核完成时间,
-                     '最终优先度': self.最终优先度,
                      '状态': self.状态,
-                     '备注': self.备注}
+                     '备注': self.备注, '终止备注': self.终止备注}
         return flow_dict
 
 
 class Sample(db.Model):
-    __tablename__ ='sample'
+    __tablename__ = 'sample'
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     mgcode = db.Column(db.String(100))
     samcode = db.Column(db.String(100))
