@@ -10,7 +10,7 @@ from flask_cors import CORS
 from sqlalchemy import func, or_, and_
 
 from app.models import Flow, db
-from app.ext import dict_to_sql, excel_to_dict, out_file_575, dict_df_to_sql
+from app.ext import dict_to_sql, excel_to_dict, out_file_575, dict_df_to_sql, add_sam_dict
 
 flow_bp = Blueprint('flow_bp', __name__, template_folder=path.join(path.pardir, 'templates'), url_prefix="/flow")
 CORS(flow_bp)
@@ -63,9 +63,7 @@ def view_with_sam(mgcode):
     sample = {}
     data = []
     filter_mg = []
-    for row in status:
-        data.append(row.to_dict())
-        filter_mg.append({'label': row.迈景编号, 'value': row.迈景编号})
+    data.append(status.to_dict())
     sample['data'] = data
     sample['filter_mg'] = filter_mg
     return jsonify(sample)
@@ -121,7 +119,9 @@ def review_rp():
 @flow_bp.route('/api/submit1/', methods=['GET', 'POST'])
 def submit_step():
     data = request.get_data()
-    selection = ((json.loads(data)['data']))
+    selection = json.loads(data)['data']
+    if isinstance(selection,dict):
+        selection = [selection]
     for sel in selection:
         mg_name = (sel['迈景编号'])
         sam_name = sel['申请单号']
@@ -132,13 +132,24 @@ def submit_step():
     return 'hello'
 
 
+@flow_bp.route('/api/addsam/', methods=['GET', 'POST'])
+def add_sam():
+    data = request.get_data()
+    selection = json.loads(data)['data']
+    flow = Flow()
+    add_sam_dict(flow, selection)
+    db.session.add(flow)
+    db.session.commit()
+    return 'hello'
+
+
 @flow_bp.route('/api/list/flow/', methods=['GET', 'POST'])
 def add_flow():
     data = request.get_data()
     selection = ((json.loads(data)['selection']))
     for sel in selection:
         # print((sel))
-        mg_name = (sel['迈景编号'])
+        mg_name = sel['迈景编号']
         sam_name = sel['申请单号']
         # print(sam_name)
         sample = Flow.query.filter(and_(Flow.迈景编号 == mg_name, Flow.申请单号 == sam_name))

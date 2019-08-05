@@ -99,6 +99,30 @@ def creat_flow(res, dict_v):
     res.状态 = '等待流转'
 
 
+def add_sam_dict(res, dict_v):
+    res.患者姓名 = dict_v.get('患者姓名')
+    res.检测项目 = dict_v.get('检测项目')
+    res.病理诊断 = dict_v.get('病理诊断')
+    res.申请单号 = dict_v.get('申请单号')
+    res.迈景编号 = dict_v.get('迈景编号')
+    res.样本类型 = dict_v.get('样本类型')
+    res.收样日期 = dict_v.get('收样日期')
+    res.流转开始日期 = dict_v.get('流转开始日期')
+    res.提取完成日期 = dict_v.get('提取完成日期')
+    res.建库完成日期 = dict_v.get('建库完成日期')
+    res.实际上机日期 = dict_v.get('实际上机日期')
+    res.测序完成日期 = dict_v.get('测序完成日期')
+    res.生信完成日期 = dict_v.get('生信完成日期')
+    res.报告完成时间 = dict_v.get('报告完成时间')
+    res.审核完成时间 = dict_v.get('审核完成时间')
+    res.预计完成时间 = get_day(dict_v.get('流转开始日期'), 14) if '血' in \
+                      dict_v.get('样本类型') else get_day(dict_v.get('流转开始日期'), 11)
+    res.备注 = dict_v.get('备注')
+    res.type = 'b' if '血' in dict_v.get('样本类型') else 't'
+    res.终止备注 = ''
+    res.状态 = '等待流转'
+
+
 def dict_to_sql(file, classname, session):
     dict_v = excel_to_dict(file)
     if dict_v:
