@@ -4,6 +4,7 @@ import pandas as pd
 
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from sqlalchemy import and_
 from flask_principal import (Permission, Principal, RoleNeed)
 from flask_cors import CORS
 
@@ -200,7 +201,8 @@ def dict_df_to_sql(df, classname, session):
     dict_v = df_to_dict(df)
     if dict_v:
         for key in dict_v.keys():
-            if classname.query.filter(classname.患者姓名 == str(dict_v[key]['患者姓名'])).first():
+            if classname.query.filter(and_(classname.患者姓名 == str(dict_v[key]['患者姓名']),
+                                           classname.申请单号 == str(dict_v[key]['申请单号']))).first():
                 pass
             else:
                 res = classname()
