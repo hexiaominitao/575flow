@@ -59,7 +59,7 @@ def view():
 
 @flow_bp.route('/api/list/<mgcode>')
 def view_with_sam(mgcode):
-    status = Flow.query.filter(Flow.迈景编号==mgcode).first()
+    status = Flow.query.filter(Flow.迈景编号 == mgcode).first()
     sample = {}
     data = []
     filter_mg = []
@@ -120,7 +120,7 @@ def review_rp():
 def submit_step():
     data = request.get_data()
     selection = json.loads(data)['data']
-    if isinstance(selection,dict):
+    if isinstance(selection, dict):
         selection = [selection]
     for sel in selection:
         mg_name = (sel['迈景编号'])
@@ -155,8 +155,8 @@ def add_flow():
         sample = Flow.query.filter(and_(Flow.迈景编号 == mg_name, Flow.申请单号 == sam_name))
         if sample.first():
             sample.update({
-                    '状态': '流转中',
-                })
+                '状态': '流转中',
+            })
             db.session.commit()
     return 'hello'
 
@@ -176,11 +176,13 @@ def del_flow():
             db.session.commit()
     return 'hello'
 
+
 @flow_bp.route('/api/flowing/', methods=['GET', 'POST'])
 def flowing():
-    list_da = {'流转中':'distill','提取完成':'build','建库完成':'run','上机完成':'seq','测序完成':'analysis','生信完成':'report','报告完成':'check',
-               '审核完成':'note','流转完成':'data_c','终止':'data_e'}
-    status = Flow.query.filter(and_(Flow.状态 != '等待流转',Flow.状态 != '完成')).order_by(Flow.id.desc()).all()
+    list_da = {'流转中': 'distill', '提取完成': 'build', '建库完成': 'run', '上机完成': 'seq', '测序完成': 'analysis', '生信完成': 'report',
+               '报告完成': 'check',
+               '审核完成': 'note', '流转完成': 'data_c', '终止': 'data_e'}
+    status = Flow.query.filter(and_(Flow.状态 != '等待流转', Flow.状态 != '完成')).order_by(Flow.id.desc()).all()
     sample = {}
     data = []
     filter_mg = []
@@ -189,12 +191,28 @@ def flowing():
         filter_mg.append({'label': row.迈景编号, 'value': row.迈景编号})
     sample['data'] = data
     # sample['filter_mg'] = filter_mg
-    for key,val in list_da.items():
+    for key, val in list_da.items():
         status = Flow.query.filter(Flow.状态 == key).order_by(Flow.id.desc()).all()
         data = []
         for row in status:
             data.append(row.to_dict())
         sample[val] = data
+    return jsonify(sample)
+
+
+@flow_bp.route('/api/flowing/<page>', methods=['GET'])
+def flowing_by_page(page):
+    status = Flow.query.filter(and_(Flow.状态 != '等待流转',
+                                    Flow.状态 != '完成')).order_by \
+        (Flow.id.desc()).paginate(page=int(page), per_page=15, error_out=False)
+    sample = {}
+    data = []
+    filter_mg = []
+    for row in status.items:
+        data.append(row.to_dict())
+        filter_mg.append({'label': row.迈景编号, 'value': row.迈景编号})
+    sample['data'] = data
+    sample['total'] = len(Flow.query.all())
     return jsonify(sample)
 
 
@@ -206,5 +224,5 @@ def test():
           'key': '%s',
           'width': 120,
           'sortable': true
-        },'''%(row,row))
+        },''' % (row, row))
     return 'hah'
