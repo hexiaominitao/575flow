@@ -57,6 +57,21 @@ def view():
     return jsonify(sample)
 
 
+@flow_bp.route('/api/list/page/<page>')
+def view_page(page):
+    status = Flow.query.order_by(Flow.id.desc()).paginate(page=int(page), per_page=15, error_out=False)
+    sample = {}
+    data = []
+    filter_mg = []
+    for row in status.items:
+        data.append(row.to_dict())
+        filter_mg.append({'label': row.迈景编号, 'value': row.迈景编号})
+    sample['data'] = data
+    sample['filter_mg'] = filter_mg
+    sample['total'] = len(Flow.query.all())
+    return jsonify(sample)
+
+
 @flow_bp.route('/api/list/<mgcode>')
 def view_with_sam(mgcode):
     status = Flow.query.filter(Flow.迈景编号 == mgcode).first()
