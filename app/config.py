@@ -17,6 +17,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = MY_SQL
     CACHE_TYPE = 'null'
     COUNT_DEST = 'app/static/upload'
+    REPORT = 'app/static/download'
     EXPORT_DEST = 'app/static/local_file/export'
     UPLOADED_FILERESULT_DEST = 'app/static/up_file/result'
     UPLOADED_FILEFASTQ_DEST = 'app/static/up_file'

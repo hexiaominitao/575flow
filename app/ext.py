@@ -1,6 +1,7 @@
-import os
+import os, csv
 import datetime
 import pandas as pd
+import xlrd
 
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -117,7 +118,7 @@ def add_sam_dict(res, dict_v):
     res.报告完成时间 = dict_v.get('报告完成时间')
     res.审核完成时间 = dict_v.get('审核完成时间')
     res.预计完成时间 = get_day(dict_v.get('流转开始日期'), 14) if '血' in \
-                      dict_v.get('样本类型') else get_day(dict_v.get('流转开始日期'), 11)
+                                                      dict_v.get('样本类型') else get_day(dict_v.get('流转开始日期'), 11)
     res.备注 = dict_v.get('备注')
     res.type = 'b' if '血' in dict_v.get('样本类型') else 't'
     res.终止备注 = ''
@@ -182,7 +183,7 @@ def out_file_575(infile):
     df = pd.read_excel(file, keep_default_na=False)
     df['预计完成时间'] = [get_day(day, 14) if '血' in type else get_day(day, 11) for day, type in df[['收样日期', '样本类型']].values]
     df['type'] = ['b' if '血' in type else 't' for type in df['样本类型'].values]
-    print(df['预计完成时间'] )
+    print(df['预计完成时间'])
     return df
 
 
@@ -211,5 +212,53 @@ def dict_df_to_sql(df, classname, session):
                 session.commit()
 
 
-def progress():
-    pass
+def df2dict(df):
+    result_dict = {}
+    for i in df.index:
+        row_dict = {}
+        for sam in df.columns:
+            row_dict[sam] = str(df.loc[i][sam])
+        result_dict[i] = row_dict
+    return result_dict
+
+
+def excel2dict(file):
+    df = pd.read_excel(file, header=1, keep_default_na=False)
+
+    for i in df['Run name'].unique():
+        if i:
+            run_name = i
+    df['Run name'] = run_name
+    for i in df['上机时间'].unique():
+        if i:
+            start_T = i
+    df['上机时间'] = start_T
+    for i in df['下机时间'].unique():
+        if i:
+            end_T = i
+    df['下机时间'] = end_T
+    dict_f = df2dict(df)
+    return dict_f
+
+
+def get_excel_title(file):
+    data = xlrd.open_workbook(file)
+    table = data.sheets()[0]
+    title = table.row_values(0)[0].strip('上机信息表')
+    return title
+
+
+def time_set(item):
+    if '.' in item:
+        date = datetime.datetime.strptime(item, "%Y.%m.%d %H:%M")
+    else:
+        date = datetime.datetime.strptime(item, "%Y%m%d %H:%M")
+    time = date.strftime('%Y-%m-%d %H:%M:%S')
+    return time
+
+
+def creat_sample_sheet(file, header):
+    with open(file, 'w', newline='')as f:
+        writer = csv.writer(f, delimiter=',')
+        for row in header:
+            writer.writerow(row)

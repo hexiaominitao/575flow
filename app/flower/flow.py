@@ -9,8 +9,10 @@ from flask_login import login_required
 from flask_cors import CORS
 from sqlalchemy import func, or_, and_
 
-from app.models import Flow, db
-from app.ext import dict_to_sql, excel_to_dict, out_file_575, dict_df_to_sql, add_sam_dict
+from app.models import Flow, db,RunInfo,SeqInfo
+from app.ext import dict_to_sql, excel_to_dict, out_file_575, \
+    dict_df_to_sql, add_sam_dict ,df2dict, \
+    excel2dict, get_excel_title,time_set,creat_sample_sheet
 
 flow_bp = Blueprint('flow_bp', __name__, template_folder=path.join(path.pardir, 'templates'), url_prefix="/flow")
 CORS(flow_bp)
@@ -100,6 +102,43 @@ def updata():
         df = out_file_575(filename)
         dict_df_to_sql(df, Flow, db.session)
         os.remove(filename)
+    return 'hello'
+
+
+@flow_bp.route('/api/uploadrun/', methods=['GET', 'POST'])
+def uploadrun():
+    file_dir = current_app.config['COUNT_DEST']
+    if request.method == 'GET':
+        for file in os.listdir(os.path.join(os.getcwd(), file_dir)):
+            os.remove(os.path.join(os.getcwd(), file_dir, file))
+    if not os.path.exists(os.path.join(os.getcwd(), file_dir)):
+        os.mkdir(os.path.join(os.getcwd(), file_dir))
+    file = request.files['file']
+    if file:
+        file.save(os.path.join(file_dir, file.filename))
+        filename = (os.path.join(os.getcwd(), file_dir, file.filename))
+        title = get_excel_title(filename)
+        dict_run = excel2dict(filename)
+        for dict_val in dict_run.values():
+            run = RunInfo.query.filter(RunInfo.name == dict_val.get('Run name')).first()
+            if run:
+                pass
+            else:
+                run = RunInfo(name=dict_val.get('Run name'), platform=title,
+                              start_T=time_set(dict_val.get('上机时间')),
+                              end_T=time_set(dict_val.get('下机时间')))
+                db.session.add(run)
+                db.session.commit()
+            seq = SeqInfo.query.filter(SeqInfo.sample_name == dict_val.get('样本编号')).first()
+            if seq:
+                pass
+            else:
+                seq = SeqInfo(sample_name=dict_val.get('样本编号'),
+                              item=dict_val.get('检测项目'), barcode=dict_val.get('index(P7+P5)'),
+                              note=dict_val.get('备注'))
+                db.session.add(seq)
+                run.seq_info.append(seq)
+            db.session.commit()
     return 'hello'
 
 
@@ -241,3 +280,86 @@ def test():
           'sortable': true
         },''' % (row, row))
     return 'hah'
+
+
+@flow_bp.route('/api/run_info/<page>', methods=['GET','POST'])
+def runinfo(page):
+    status = RunInfo.query.order_by(RunInfo.id.desc()).paginate(page=int(page), per_page=20, error_out=False)
+    sample = {}
+    data = []
+    for row in status.items:
+        data.append(row.to_dict())
+    sample['data'] = data
+    sample['total'] = len(RunInfo.query.all())
+    return jsonify(sample)
+
+
+@flow_bp.route('/api/seq_info/<mg_id>', methods=['GET','POST'])
+def seqinfo(mg_id):
+    run_info = {}
+    run = RunInfo.query.filter(RunInfo.name == mg_id).first()
+    run_info['run'] = run.to_dict()
+    list_seq = []
+    for seq in run.seq_info:
+        list_seq.append(seq.to_dict())
+    run_info['seq'] = list_seq
+    return jsonify(run_info)
+
+
+@flow_bp.route('/api/download/<mg_id>', methods=['GET', 'POST'])
+def download(mg_id):
+    dir = os.path.join(os.getcwd(), current_app.config['REPORT'])
+    for file in os.listdir(dir):
+        os.remove(os.path.join(dir, file))
+    file = os.path.join(dir,'SampleSheet_{}.csv'.format(mg_id))
+    header = [['[Header]', '', '', '', '', '', '', '', '', ''], ['IEMFileVersion', '5', '', '', '', '', '', '', '', ''],
+              ['Date', '5/21/2019', '', '', '', '', '', '', '', ''],
+              ['Workflow', 'GenerateFASTQ', '', '', '', '', '', '', '', ''],
+              ['Application', 'NextSeq FASTQ Only', '', '', '', '', '', '', '', ''],
+              ['Instrument Type', 'NextSeq/MiniSeq', '', '', '', '', '', '', '', ''],
+              ['Assay', 'Nextera XT', '', '', '', '', '', '', '', ''],
+              ['Index Adapters', 'Nextera XT Index Kit (24 Indexes, 96 Samples)', '', '', '', '', '', '', '', ''],
+              ['Description', '', '', '', '', '', '', '', '', ''],
+              ['Chemistry', 'Amplicon', '', '', '', '', '', '', '', ''], ['', '', '', '', '', '', '', '', '', ''],
+              ['[Reads]', '', '', '', '', '', '', '', '', ''], ['151', '', '', '', '', '', '', '', '', ''],
+              ['151', '', '', '', '', '', '', '', '', ''], ['', '', '', '', '', '', '', '', '', ''],
+              ['[Settings]', '', '', '', '', '', '', '', '', ''], ['ReverseCo', '0', '', '', '', '', '', '', '', ''],
+              ['', '', '', '', '', '', '', '', '', ''], ['[Data]', '', '', '', '', '', '', '', '', ''],
+              ['Sample_ID', 'Sample_Name', 'Sample_Plate', 'Sample_Well', 'I7_Index_ID', 'index', 'I5_Index_ID',
+               'index2',
+               'Sample_Project', 'Description']]
+    index_dict = {'A01': 'GTCTGTCA', 'B01': 'TGAAGAGA', 'C01': 'TTCACGCA', 'D01': 'AACGTGAT', 'E01': 'ACCACTGT',
+                  'F01': 'ACCTCCAA', 'G01': 'ATTGAGGA', 'H01': 'ACACAGAA', 'A02': 'GCGAGTAA', 'B02': 'GTCGTAGA',
+                  'C02': 'GTGTTCTA', 'D02': 'TATCAGCA', 'E02': 'TGGAACAA', 'F02': 'TGGTGGTA', 'G02': 'ACTATGCA',
+                  'H02': 'CCTAATCC', 'A03': 'AGCAGGAA', 'B03': 'AGCCATGC', 'C03': 'TGGCTTCA', 'D03': 'CATCAAGT',
+                  'E03': 'CTAAGGTC', 'F03': 'AGTGGTCA', 'G03': 'AGATCGCA', 'H03': 'ATCCTGTA', 'A04': 'CCGTGAGA',
+                  'B04': 'GACTAGTA', 'C04': 'GATAGACA', 'D04': 'GCTCGGTA', 'E04': 'GGTGCGAA', 'F04': 'AACAACCA',
+                  'G04': 'CGGATTGC', 'H04': 'AGTCACTA', 'A05': 'AAACATCG', 'B05': 'ACGTATCA', 'C05': 'CCATCCTC',
+                  'D05': 'GGAGAACA', 'E05': 'CGAACTTA', 'F05': 'ACAAGCTA', 'G05': 'CTGAGCCA', 'H05': 'ACATTGGC',
+                  'A06': 'CATACCAA', 'B06': 'CAATGGAA', 'C06': 'ACGCTCGA', 'D06': 'CCAGTTCA', 'E06': 'TAGGATGA',
+                  'F06': 'CGCATACA', 'G06': 'AGAGTCAA', 'H06': 'AGATGTAC', 'A07': 'ATGCCTAA', 'B07': 'ATCATTCC',
+                  'C07': 'AACTCACC', 'D07': 'AACGCTTA', 'E07': 'CAGCGTTA', 'F07': 'CTCAATGA', 'G07': 'AATGTTGC',
+                  'H07': 'CAAGGAGC', 'A08': 'GAATCTGA', 'B08': 'GAGCTGAA', 'C08': 'GCCACATA', 'D08': 'GCTAACGA',
+                  'E08': 'GTACGCAA', 'F08': 'TCCGTCTA', 'G08': 'CAGATCTG', 'H08': 'AGTACAAG', 'A09': 'AGGCTAAC',
+                  'B09': 'CGACTGGA', 'C09': 'CACCTTAC', 'D09': 'CACTTCGA', 'E09': 'GAGTTAGC', 'F09': 'CTGGCATA',
+                  'G09': 'AAGGTACA', 'H09': 'CGACACAC', 'A10': 'ACAGCAGA', 'B10': 'AAGAGATC', 'C10': 'CAAGACTA',
+                  'D10': 'AAGACGGA', 'E10': 'GCCAAGAC', 'F10': 'CTGTAGCC', 'G10': 'CGCTGATC', 'H10': 'CAACCACA',
+                  'A11': 'CCTCCTGA', 'B11': 'TCTTCACA', 'C11': 'GAACAGGC', 'D11': 'ATTGGCTC', 'E11': 'AAGGACAC',
+                  'F11': 'ACACGACC', 'G11': 'ATAGCGAC', 'H11': 'CCGAAGTA', 'A12': 'CCTCTATC', 'B12': 'AACCGAGA',
+                  'C12': 'GATGAATC', 'D12': 'GACAGTGC', 'E12': 'CCGACAAC', 'F12': 'AGCACCTC', 'G12': 'ACAGATTC',
+                  'H12': 'AATCCGTC'}
+
+    run = RunInfo.query.filter(RunInfo.name == mg_id).first()
+    i = 1
+    for seq in run.seq_info:
+        tem_list = []
+        index_code = seq.barcode
+        if index_code:
+            tem_list.extend([i, seq.sample_name, '', '', index_code, index_dict[index_code], '', 'NNNNNNNNNN', '', ''])
+            header.append(tem_list)
+            i += 1
+    creat_sample_sheet(file,header)
+
+    # print(dir)
+    # print(filename)
+    return send_from_directory(dir, 'SampleSheet_{}.csv'.format(mg_id), as_attachment=True)
