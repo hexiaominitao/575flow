@@ -318,8 +318,9 @@ def download(mg_id):
     for file in os.listdir(dir):
         os.remove(os.path.join(dir, file))
     file = os.path.join(dir,'SampleSheet_{}.csv'.format(mg_id))
+    run = RunInfo.query.filter(RunInfo.name == mg_id).first()
     header = [['[Header]', '', '', '', '', '', '', '', '', ''], ['IEMFileVersion', '5', '', '', '', '', '', '', '', ''],
-              ['Date', '5/21/2019', '', '', '', '', '', '', '', ''],
+              ['Date', '{}'.format(run.end_T), '', '', '', '', '', '', '', ''],
               ['Workflow', 'GenerateFASTQ', '', '', '', '', '', '', '', ''],
               ['Application', 'NextSeq FASTQ Only', '', '', '', '', '', '', '', ''],
               ['Instrument Type', 'NextSeq/MiniSeq', '', '', '', '', '', '', '', ''],
@@ -355,7 +356,7 @@ def download(mg_id):
                   'C12': 'GATGAATC', 'D12': 'GACAGTGC', 'E12': 'CCGACAAC', 'F12': 'AGCACCTC', 'G12': 'ACAGATTC',
                   'H12': 'AATCCGTC'}
 
-    run = RunInfo.query.filter(RunInfo.name == mg_id).first()
+
     i = 1
     for seq in run.seq_info:
         tem_list = []
