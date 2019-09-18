@@ -90,6 +90,8 @@ def view_with_sam(mgcode):
 @flow_bp.route('/api/updata/', methods=['GET', 'POST'])
 def updata():
     file_dir = current_app.config['COUNT_DEST']
+    if not os.path.exists(os.path.join(os.getcwd(), file_dir)):
+        os.mkdir(os.path.join(os.getcwd(), file_dir))
     if request.method == 'GET':
         for file in os.listdir(os.path.join(os.getcwd(), file_dir)):
             os.remove(os.path.join(os.getcwd(), file_dir, file))
@@ -108,6 +110,8 @@ def updata():
 @flow_bp.route('/api/uploadrun/', methods=['GET', 'POST'])
 def uploadrun():
     file_dir = current_app.config['COUNT_DEST']
+    if not os.path.exists(os.path.join(os.getcwd(), file_dir)):
+        os.mkdir(os.path.join(os.getcwd(), file_dir))
     if request.method == 'GET':
         for file in os.listdir(os.path.join(os.getcwd(), file_dir)):
             os.remove(os.path.join(os.getcwd(), file_dir, file))
@@ -309,6 +313,8 @@ def seqinfo(mg_id):
 @flow_bp.route('/api/download/<mg_id>', methods=['GET', 'POST'])
 def download(mg_id):
     dir = os.path.join(os.getcwd(), current_app.config['REPORT'])
+    if not os.path.exists(dir):
+        os.mkdir(dir)
     for file in os.listdir(dir):
         os.remove(os.path.join(dir, file))
     file = os.path.join(dir,'SampleSheet_{}.csv'.format(mg_id))
