@@ -133,7 +133,7 @@ def uploadrun():
                               end_T=time_set(dict_val.get('下机时间')))
                 db.session.add(run)
                 db.session.commit()
-            seq = SeqInfo.query.filter(SeqInfo.sample_name == dict_val.get('样本编号')).first()
+            seq = SeqInfo.query.filter(and_(SeqInfo.sample_name == dict_val.get('样本编号'),SeqInfo.note==dict_val.get('备注'))).first()
             if seq:
                 pass
             else:
@@ -296,6 +296,35 @@ def runinfo(page):
     sample['data'] = data
     sample['total'] = len(RunInfo.query.all())
     return jsonify(sample)
+
+
+@flow_bp.route('/api/run_info/del',methods=['GET','POST'])
+def run_del():
+    data = request.get_data()
+    selection = ((json.loads(data)['selection']))
+    run_id = selection['id']
+    run = RunInfo.query.filter(RunInfo.id==run_id).one()
+    for seq in run.seq_info:
+        seq_info = SeqInfo.query.filter(SeqInfo.id==seq.id).one()
+        if seq_info:
+            db.session.delete(seq_info)
+            db.session.commit()
+    db.session.delete(run)
+    db.session.commit()
+    return 'hello'
+
+
+@flow_bp.route('/api/seq_info/del',methods=['GET','POST'])
+def seq_del():
+    data = request.get_data()
+    selection = ((json.loads(data)['selection']))
+    seq_id = selection['id']
+    seq_info = SeqInfo.query.filter(SeqInfo.id==seq_id).one()
+    if seq_info:
+        db.session.delete(seq_info)
+        db.session.commit()
+    return 'hello'
+
 
 
 @flow_bp.route('/api/seq_info/<mg_id>', methods=['GET','POST'])
