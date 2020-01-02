@@ -203,7 +203,7 @@ def dict_df_to_sql(df, classname, session):
     if dict_v:
         for key in dict_v.keys():
             if classname.query.filter(and_(classname.患者姓名 == str(dict_v[key]['患者姓名']),
-                                           classname.申请单号 == str(dict_v[key]['申请单号']))).first():
+                                           classname.迈景编号 == str(dict_v[key]['迈景编号']))).first():
                 pass
             else:
                 res = classname()

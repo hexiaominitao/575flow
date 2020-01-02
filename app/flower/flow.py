@@ -399,3 +399,4 @@ def download(mg_id):
     # print(dir)
     # print(filename)
     return send_from_directory(dir, 'SampleSheet_{}.csv'.format(mg_id), as_attachment=True)
+
